@@ -44,16 +44,11 @@
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-#ifdef ZTS
-	/* TODO: support ZTS builds (without malloc hooks) */
-#	error "ZTS build not supported (yet)"
-#endif
-
 #if MEMPROF_CONFIGURE_VERSION != 3
 #	error Please rebuild configure (run phpize and reconfigure)
 #endif
 
-#if HAVE_MALLOC_HOOKS
+#if defined(HAVE_MALLOC_HOOKS) && !defined(ZTS)
 #	include <malloc.h>
 
 #	if MEMPROF_DEBUG
@@ -182,7 +177,7 @@ static zend_bool dump_pprof(php_stream * stream);
 
 static ZEND_DECLARE_MODULE_GLOBALS(memprof)
 
-#if HAVE_MALLOC_HOOKS
+#if defined(HAVE_MALLOC_HOOKS) && !defined(ZTS)
 static void * malloc_hook(size_t size, const void *caller);
 static void * realloc_hook(void *ptr, size_t size, const void *caller);
 static void free_hook(void *ptr, const void *caller);
@@ -518,7 +513,7 @@ alloc * is_own_alloc(Pvoid_t * set, void * ptr)
 	}
 }
 
-#if HAVE_MALLOC_HOOKS
+#if defined(HAVE_MALLOC_HOOKS) && !defined(ZTS)
 
 static void * malloc_hook(size_t size, const void *caller)
 {
